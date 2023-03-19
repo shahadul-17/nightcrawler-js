@@ -1,6 +1,6 @@
-import { Fetcher } from '../Fetcher';
-import { SymmetricKeyedEncryptionAlgorithm } from './Enumerations';
-import { ISymmetricKeyedEncryptionProvider } from './ISymmetricKeyedEncryptionProvider';
+import { Fetcher } from "../Fetcher";
+import { SymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
+import { ISymmetricKeyedEncryptionProvider } from "./ISymmetricKeyedEncryptionProvider";
 
 const BASE_URL = "https://localhost:61915/api";
 

@@ -1,5 +1,5 @@
-import { AsymmetricKeyPair } from './AsymmetricKeyPair';
-import { AsymmetricKeyedEncryptionAlgorithm } from './Enumerations';
+import { AsymmetricKeyPair } from "./AsymmetricKeyPair";
+import { AsymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
 
 export interface IAsymmetricKeyedEncryptionProvider {
   deriveKeyMaterialAsync(privateKeyA: string, publicKeyB: string, algorithm: AsymmetricKeyedEncryptionAlgorithm): Promise<string>;

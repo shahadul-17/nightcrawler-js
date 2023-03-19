@@ -1,7 +1,7 @@
-import { Fetcher } from '../Fetcher';
-import { AsymmetricKeyPair } from './AsymmetricKeyPair';
-import { AsymmetricKeyedEncryptionAlgorithm } from './Enumerations';
-import { IAsymmetricKeyedEncryptionProvider } from './IAsymmetricKeyedEncryptionProvider';
+import { Fetcher } from "../Fetcher";
+import { AsymmetricKeyPair } from "./AsymmetricKeyPair";
+import { AsymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
+import { IAsymmetricKeyedEncryptionProvider } from "./IAsymmetricKeyedEncryptionProvider";
 
 const BASE_URL = "https://localhost:61915/api";
 

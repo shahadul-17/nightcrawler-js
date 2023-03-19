@@ -1,4 +1,4 @@
-import { SymmetricKeyedEncryptionAlgorithm } from './Enumerations';
+import { SymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
 
 export interface ISymmetricKeyedEncryptionProvider {
   generateKeyAsync(algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string>;
