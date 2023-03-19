@@ -1,4 +1,4 @@
-import { KeyedHashAlgorithm } from './Enumerations';
+import { KeyedHashAlgorithm } from "./Enumerations";
 
 export interface IKeyedHashProvider {
   computeHashAsync(message: string, key: string, algorithm: KeyedHashAlgorithm): Promise<string>;

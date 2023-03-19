@@ -1,5 +1,5 @@
-import { Fetcher } from '../Fetcher';
-import { HashAlgorithm } from './Enumerations';
+import { Fetcher } from "../Fetcher";
+import { HashAlgorithm } from "./Enumerations";
 import { IHashProvider } from "./IHashProvider";
 
 const BASE_URL = "https://localhost:61915/api/cryptography/hash";

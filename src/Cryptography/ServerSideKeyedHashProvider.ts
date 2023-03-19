@@ -1,6 +1,6 @@
-import { Fetcher } from '../Fetcher';
-import { KeyedHashAlgorithm } from './Enumerations';
-import { IKeyedHashProvider } from './IKeyedHashProvider';
+import { Fetcher } from "../Fetcher";
+import { KeyedHashAlgorithm } from "./Enumerations";
+import { IKeyedHashProvider } from "./IKeyedHashProvider";
 
 const BASE_URL = "https://localhost:61915/api/cryptography/keyedHash";
 

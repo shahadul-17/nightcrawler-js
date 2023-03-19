@@ -1,4 +1,4 @@
-import { HashAlgorithm } from './Enumerations';
+import { HashAlgorithm } from "./Enumerations";
 
 export interface IHashProvider {
   computeHashAsync(message: string, algorithm: HashAlgorithm): Promise<string>;
