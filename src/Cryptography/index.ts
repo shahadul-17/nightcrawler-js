@@ -5,3 +5,8 @@ export * from "./IHashProvider";
 export * from "./ServerSideHashProvider";
 export * from "./IKeyedHashProvider";
 export * from "./ServerSideKeyedHashProvider";
+export * from "./ISymmetricKeyedEncryptionProvider";
+export * from "./ServerSideSymmetricKeyedEncryptionProvider";
+export * from "./AsymmetricKeyPair";
+export * from "./IAsymmetricKeyedEncryptionProvider";
+export * from "./ServerSideAsymmetricKeyedEncryptionProvider";
