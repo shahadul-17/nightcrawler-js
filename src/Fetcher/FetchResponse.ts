@@ -1,5 +1,5 @@
 export type FetchResponse = {
-  status: number,
-  message: string,
+  StatusCode: number,
+  Message: string,
   [key: string]: any;
 };

@@ -1,7 +1,8 @@
-import { FetchResponse } from './FetchResponse';
+import { FetchOptions } from "./FetchOptions";
+import { FetchResponse } from "./FetchResponse";
 
 export interface IFetcher {
   isSupported(): boolean;
   isSupportedAsync(): Promise<boolean>;
-  fetchAsync(): Promise<FetchResponse>;
+  fetchAsync(options: FetchOptions): Promise<FetchResponse>;
 }

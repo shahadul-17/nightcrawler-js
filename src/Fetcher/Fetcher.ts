@@ -1,6 +1,6 @@
-import { IFetcher } from './IFetcher';
-import { FetchOptions } from './FetchOptions';
-import { FetchResponse } from './FetchResponse';
+import { IFetcher } from "./IFetcher";
+import { FetchOptions } from "./FetchOptions";
+import { FetchResponse } from "./FetchResponse";
 
 const XmlHttpRequestCreators = [
   () => new XMLHttpRequest(),
@@ -16,8 +16,10 @@ export class Fetcher implements IFetcher {
   private isFetcherSupported: boolean = false;
   private supportedXmlHttpRequestCreatorIndex: number = -1;
 
+  private constructor() { }
+
   public isSupported(): boolean {
-    if (typeof window?.fetch === 'function') { return true; }
+    if (typeof window?.fetch === "function") { return true; }
 
     const { xmlHttpRequestCreatorIndex, } = this.createXmlHttpRequest();
 
@@ -38,8 +40,8 @@ export class Fetcher implements IFetcher {
     });
   }
 
-  private async isOkResponse(status: number) {
-    return status > 199 && status < 300;
+  private async isOkResponse(statusCode: number) {
+    return statusCode > 199 && statusCode < 300;
   }
 
   private async getFetchResponseAsJsonAsync(response: Response) {
@@ -48,49 +50,45 @@ export class Fetcher implements IFetcher {
 
       return json;
     } catch (error) {
-      console.error('An error occurred while retrieving JSON response.', error);
+      console.error("An error occurred while retrieving JSON response.", error);
     }
 
     return {};
   }
 
   private async fetchUsingInBuiltFetchAsync(options: FetchOptions): Promise<undefined | FetchResponse> {
-    if (typeof window?.fetch !== 'function') { return undefined; }
+    if (typeof window?.fetch !== "function") { return undefined; }
 
     try {
       const response = await window.fetch(options.url, {
         method: options.method,
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          ...options.headers,
-        },
+        headers: options.headers,
         body: options.body as string,
       });
-      const status = response.status;
+      const statusCode = response.status;
       let responseAsJson = await this.getFetchResponseAsJsonAsync(response);
 
-      if (!this.isOkResponse(status)) {
+      if (!this.isOkResponse(statusCode)) {
         return {
-          status: status,
-          message: `An error occurred while processing the request (${status}).`,
+          StatusCode: statusCode,
+          Message: `An error occurred while processing the request (${statusCode}).`,
           ...responseAsJson,
         };
       }
 
       responseAsJson = {
-        status: status,
-        message: `Request processed successfully (${status}).`,
+        StatusCode: statusCode,
+        Message: `Request processed successfully (${statusCode}).`,
         ...responseAsJson,
       };
 
       return responseAsJson;
     } catch (error) {
-      console.error('An error occurred while processing the request.', error);
+      console.error("An error occurred while processing the request.", error);
 
       return {
-        status: -1,
-        message: 'An error occurred while processing the request.',
+        StatusCode: -3,
+        Message: "An error occurred while processing the request.",
       };
     }
   }
@@ -104,66 +102,64 @@ export class Fetcher implements IFetcher {
 
       if (xmlHttpRequestCreatorIndex === -1) {
         resolve(undefined);
+
+        return;
       }
 
-      var xmlHttpRequest2 = new XMLHttpRequest();
-      xmlHttpRequest2.open(options.method, options.url, true);
-      xmlHttpRequest2.timeout = 30000;
-      xmlHttpRequest2.responseType = "arraybuffer";
+      xmlHttpRequest.open(options.method, options.url, true);
+      xmlHttpRequest.timeout = 30000;
+      xmlHttpRequest.responseType = "json";
 
-      const headers: Record<string, string> = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        ...options.headers,
-      };
-      const headerKeys = Object.getOwnPropertyNames(headers);
+      const headerKeys = Object.getOwnPropertyNames(options.headers);
 
       for (const headerKey of headerKeys) {
-        const headerValue = headers[headerKey];
+        const headerValue = options.headers![headerKey];
 
-        xmlHttpRequest2.setRequestHeader(headerKey, headerValue);
+        xmlHttpRequest.setRequestHeader(headerKey, headerValue);
       }
 
-      xmlHttpRequest2.addEventListener("abort", () => {
+      xmlHttpRequest.addEventListener("abort", () => {
         resolve({
-          status: -4,
-          message: "Your request has been aborted.",
+          StatusCode: -4,
+          Message: "Your request has been aborted.",
         });
       });
 
-      xmlHttpRequest2.addEventListener("timeout", () => {
+      xmlHttpRequest.addEventListener("timeout", () => {
         resolve({
-          status: -3,
-          message: "Your request has timed out.",
+          StatusCode: -5,
+          Message: "Your request has timed out.",
         });
       });
 
-      xmlHttpRequest2.addEventListener("error", () => {
+      xmlHttpRequest.addEventListener("error", () => {
         resolve({
-          status: -2,
-          message: "An error occurred while sending the request.",
+          StatusCode: -6,
+          Message: "An error occurred while sending the request.",
         });
       });
 
-      xmlHttpRequest2.addEventListener("readystatechange", event => {
-        const status = xmlHttpRequest2.status;
+      xmlHttpRequest.addEventListener("readystatechange", () => {
+        const statusCode = xmlHttpRequest.status;
 
-        if (xmlHttpRequest2.readyState !== 4) { return; }
-        if (!this.isOkResponse(xmlHttpRequest2.status)) {
+        if (xmlHttpRequest.readyState !== 4) { return; }
+        if (!this.isOkResponse(statusCode)) {
           resolve({
-            status: status,
-            message: `An error occurred while processing the request (${status}).`,
+            StatusCode: statusCode,
+            Message: `An error occurred while processing the request (${statusCode}).`,
           });
 
           return;
         }
 
-        // this allows error listener resolve the promise. because,
-        // error listener is executed after ready state change listener...
-        httpResponse && xmlHttpRequest2.status !== 0 && resolve(httpResponse);
+        xmlHttpRequest.response && statusCode !== 0 && resolve({
+          StatusCode: statusCode,
+          Message: `Request processed successfully (${statusCode}).`,
+          ...xmlHttpRequest.response,
+        });
       });
 
-      xmlHttpRequest2.send(options.body as string);
+      xmlHttpRequest.send(options.body as string);
     });
   }
 
@@ -172,10 +168,16 @@ export class Fetcher implements IFetcher {
 
     if (!this.isFetcherSupported) {
       return {
-        status: -2,
-        message: 'Fetcher is not supported by this platform.',
+        StatusCode: -1,
+        Message: "Fetcher is not supported by this platform.",
       };
     }
+
+    options.headers = {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
 
     if (typeof options.body === "object") {
       options.body = JSON.stringify(options.body);
@@ -183,18 +185,20 @@ export class Fetcher implements IFetcher {
 
     let fetchResponse: undefined | FetchResponse;
 
-    if (typeof window?.fetch === 'function') {
+    if (typeof window?.fetch === "function") {
       fetchResponse = await this.fetchUsingInBuiltFetchAsync(options);
     } else {
       fetchResponse = await this.fetchUsingXmlHttpRequestAsync(options);
     }
 
-    if (typeof fetchResponse === 'undefined') {
+    if (typeof fetchResponse === "undefined") {
       return {
-        status: -3,
-        message: 'An error occurred while processing the request.',
+        StatusCode: -2,
+        Message: "An error occurred while processing the request.",
       };
     }
+
+    return fetchResponse;
   }
 
   private createXmlHttpRequest(index?: number): any {

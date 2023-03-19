@@ -1,1 +1,1 @@
-export type HttpMethod = "HEAD" | "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS";
+export type HttpMethod = "HEAD" | "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
