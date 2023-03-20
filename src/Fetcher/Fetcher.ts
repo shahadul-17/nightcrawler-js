@@ -185,10 +185,10 @@ export class Fetcher implements IFetcher {
 
         if (options.url.charAt(4) === "s") {
           port = url.port.length === 0 ? 443 : parseInt(url.port);
-          httpClient = new Function("require(\"https\");")();
+          httpClient = eval("require(\"https\");");
         } else {
           port = url.port.length === 0 ? 80 : parseInt(url.port);
-          httpClient = new Function("require(\"http\");")();
+          httpClient = eval("require(\"http\");");
         }
 
         const isBodyProvided = typeof options.body === "string";
