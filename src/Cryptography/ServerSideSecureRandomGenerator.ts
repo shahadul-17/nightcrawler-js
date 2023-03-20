@@ -1,7 +1,6 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
 import { ISecureRandomGenerator } from "./ISecureRandomGenerator";
-
-const BASE_URL = "https://localhost:61915/api/random";
 
 export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
 
@@ -10,7 +9,7 @@ export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
   async generateByteAsync(): Promise<number> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/byte`,
+      url: `${Configuration.getServerAddress()}/api/random/byte`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -21,7 +20,7 @@ export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
   async generateIntegerAsync(digits?: number, minimum?: number, maximum?: number): Promise<number> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/integer?digits=${digits ?? ""}&minimum=${minimum ?? ""}&maximum=${maximum ?? ""}`,
+      url: `${Configuration.getServerAddress()}/api/random/integer?digits=${digits ?? ""}&minimum=${minimum ?? ""}&maximum=${maximum ?? ""}`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -32,7 +31,7 @@ export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
   async generateLongAsync(digits?: number, minimum?: number, maximum?: number): Promise<number> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/long?digits=${digits ?? ""}&minimum=${minimum ?? ""}&maximum=${maximum ?? ""}`,
+      url: `${Configuration.getServerAddress()}/api/random/long?digits=${digits ?? ""}&minimum=${minimum ?? ""}&maximum=${maximum ?? ""}`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -43,7 +42,7 @@ export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
   async generateCharacterAsync(): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/character`,
+      url: `${Configuration.getServerAddress()}/api/random/character`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -54,7 +53,7 @@ export class ServerSideSecureRandomGenerator implements ISecureRandomGenerator {
   async generateStringAsync(length: number): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/string/${length}`,
+      url: `${Configuration.getServerAddress()}/api/random/string/${length}`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }

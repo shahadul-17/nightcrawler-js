@@ -1,8 +1,7 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
 import { HashAlgorithm } from "./Enumerations";
 import { IHashProvider } from "./IHashProvider";
-
-const BASE_URL = "https://localhost:61915/api/cryptography/hash";
 
 export class ServerSideHashProvider implements IHashProvider {
 
@@ -11,7 +10,7 @@ export class ServerSideHashProvider implements IHashProvider {
   async computeHashAsync(message: string, algorithm: HashAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/${algorithm}`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/hash/${algorithm}`,
       body: {
         Message: message,
       },

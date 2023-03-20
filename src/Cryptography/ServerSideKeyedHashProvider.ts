@@ -1,8 +1,7 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
 import { KeyedHashAlgorithm } from "./Enumerations";
 import { IKeyedHashProvider } from "./IKeyedHashProvider";
-
-const BASE_URL = "https://localhost:61915/api/cryptography/keyedHash";
 
 export class ServerSideKeyedHashProvider implements IKeyedHashProvider {
 
@@ -11,7 +10,7 @@ export class ServerSideKeyedHashProvider implements IKeyedHashProvider {
   async computeHashAsync(message: string, key: string, algorithm: KeyedHashAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/${algorithm}`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/keyedHash/${algorithm}`,
       body: {
         Message: message,
         Key: key,

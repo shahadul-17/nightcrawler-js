@@ -1,8 +1,7 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
 import { SymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
 import { ISymmetricKeyedEncryptionProvider } from "./ISymmetricKeyedEncryptionProvider";
-
-const BASE_URL = "https://localhost:61915/api";
 
 export class ServerSideSymmetricKeyedEncryptionProvider implements ISymmetricKeyedEncryptionProvider {
 
@@ -11,7 +10,7 @@ export class ServerSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
   async generateKeyAsync(algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/keys/${algorithm}`,
+      url: `${Configuration.getServerAddress()}/api/keys/${algorithm}`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -22,7 +21,7 @@ export class ServerSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
   async encryptAsync(plaintext: string, key: string, algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/cryptography/symmetric/${algorithm}/encrypt`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/symmetric/${algorithm}/encrypt`,
       body: {
         Plaintext: plaintext,
         Key: key,
@@ -37,7 +36,7 @@ export class ServerSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
   async decryptAsync(ciphertext: string, key: string, algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/cryptography/symmetric/${algorithm}/decrypt`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/symmetric/${algorithm}/decrypt`,
       body: {
         Ciphertext: ciphertext,
         Key: key,

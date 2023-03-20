@@ -1,9 +1,8 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
 import { AsymmetricKeyPair } from "./AsymmetricKeyPair";
 import { AsymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
 import { IAsymmetricKeyedEncryptionProvider } from "./IAsymmetricKeyedEncryptionProvider";
-
-const BASE_URL = "https://localhost:61915/api";
 
 export class ServerSideAsymmetricKeyedEncryptionProvider implements IAsymmetricKeyedEncryptionProvider {
 
@@ -12,7 +11,7 @@ export class ServerSideAsymmetricKeyedEncryptionProvider implements IAsymmetricK
   async deriveKeyMaterialAsync(privateKeyA: string, publicKeyB: string, algorithm: AsymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/keys/asymmetric/${algorithm}/derive`,
+      url: `${Configuration.getServerAddress()}/api/keys/asymmetric/${algorithm}/derive`,
       body: {
         PrivateKeyA: privateKeyA,
         PublicKeyB: publicKeyB,
@@ -27,7 +26,7 @@ export class ServerSideAsymmetricKeyedEncryptionProvider implements IAsymmetricK
   async generateKeyPairAsync(algorithm: AsymmetricKeyedEncryptionAlgorithm): Promise<AsymmetricKeyPair> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/keys/${algorithm}`,
+      url: `${Configuration.getServerAddress()}/api/keys/${algorithm}`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -41,7 +40,7 @@ export class ServerSideAsymmetricKeyedEncryptionProvider implements IAsymmetricK
   async encryptAsync(plaintext: string, publicKey: string, algorithm: AsymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/cryptography/asymmetric/${algorithm}/encrypt`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/asymmetric/${algorithm}/encrypt`,
       body: {
         Plaintext: plaintext,
         PublicKey: publicKey,
@@ -56,7 +55,7 @@ export class ServerSideAsymmetricKeyedEncryptionProvider implements IAsymmetricK
   async decryptAsync(ciphertext: string, privateKey: string, algorithm: AsymmetricKeyedEncryptionAlgorithm): Promise<string> {
     const response = await Fetcher.instance.fetchAsync({
       method: "POST",
-      url: `${BASE_URL}/cryptography/asymmetric/${algorithm}/decrypt`,
+      url: `${Configuration.getServerAddress()}/api/cryptography/asymmetric/${algorithm}/decrypt`,
       body: {
         Ciphertext: ciphertext,
         PrivateKey: privateKey,

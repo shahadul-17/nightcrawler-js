@@ -1,3 +1,4 @@
+export * from "./Enumerations";
 export * from "./IFetcher";
 export * from "./Fetcher";
 export * from "./FetchOptions";

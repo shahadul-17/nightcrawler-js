@@ -1,6 +1,5 @@
+import { Configuration } from "../Configuration";
 import { Fetcher } from "../Fetcher";
-
-const BASE_URL = "https://localhost:61915/api";
 
 export class MiscellaneousServices {
 
@@ -9,7 +8,7 @@ export class MiscellaneousServices {
   static async pingAsync(): Promise<any> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/ping`,
+      url: `${Configuration.getServerAddress()}/api/ping`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
@@ -20,7 +19,7 @@ export class MiscellaneousServices {
   static async getServerTimeAsync(): Promise<Date> {
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
-      url: `${BASE_URL}/time`,
+      url: `${Configuration.getServerAddress()}/api/time`,
     });
 
     if (response.StatusCode !== 200) { throw new Error(response.Message); }
