@@ -23,10 +23,16 @@ export class Configuration {
   }
 
   static isInsecureHttpsRequestsAllowed(): boolean {
-    return process.env["NODE_TLS_REJECT_UNAUTHORIZED"] === "0";
+    try {
+      return process.env["NODE_TLS_REJECT_UNAUTHORIZED"] === "0";
+    } catch { }
+
+    return false;
   }
 
   static allowInsecureHttpsRequests(shallAllow: boolean): void {
-    process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = shallAllow === true ? "0" : "1";
+    try {
+      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = shallAllow === true ? "0" : "1";
+    } catch { }
   }
 }

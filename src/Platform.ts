@@ -4,9 +4,9 @@ export class Platform {
 
   static isNodeJS(): boolean {
     try {
-      const fileSystem = require("fs");
-
-      return fileSystem && typeof fileSystem.existsSync === "function";
+      return typeof process === 'object'
+        && typeof process.versions === 'object'
+        && typeof process.versions.node !== 'undefined';
     } catch (error) {
       return false;
     }
