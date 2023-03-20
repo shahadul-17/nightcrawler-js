@@ -1,5 +1,6 @@
 export * from "./Enumerations";
 export * from "./ISecureRandomGenerator";
+export * from "./ClientSideSecureRandomGenerator";
 export * from "./ServerSideSecureRandomGenerator";
 export * from "./IHashProvider";
 export * from "./ClientSideHashProvider";
