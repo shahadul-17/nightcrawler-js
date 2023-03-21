@@ -35,6 +35,7 @@
   "homepage": "https://github.com/shahadul-17/nightcrawler-js#readme",
   "dependencies": {
     "crypto-js": "^4.1.1",
+    "jsencrypt": "^3.3.2",
     "typescript": "^4.9.5"
   },
   "devDependencies": {

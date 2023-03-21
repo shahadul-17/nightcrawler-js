@@ -15,4 +15,5 @@ export * from "./ClientSideSymmetricKeyedEncryptionProvider";
 export * from "./ServerSideSymmetricKeyedEncryptionProvider";
 export * from "./AsymmetricKeyPair";
 export * from "./IAsymmetricKeyedEncryptionProvider";
+export * from "./ClientSideAsymmetricKeyedEncryptionProvider";
 export * from "./ServerSideAsymmetricKeyedEncryptionProvider";

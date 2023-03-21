@@ -82,7 +82,7 @@ export class ClientSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
   }
 
   async generateKeyAsync(algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
-    return "";
+    throw new Error("This method is not implemented.");
   }
 
   async encryptAsync(plaintext: string, key: string, algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {

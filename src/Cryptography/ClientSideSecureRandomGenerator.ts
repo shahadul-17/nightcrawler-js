@@ -1,5 +1,3 @@
-import { Configuration } from "../Configuration";
-import { Fetcher } from "../Fetcher";
 import { ISecureRandomGenerator } from "./ISecureRandomGenerator";
 
 const MinimumByteValue = 0;
@@ -72,7 +70,7 @@ export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
   }
 
   async generateLongAsync(digits?: number, minimum?: number, maximum?: number): Promise<number> {
-    return 0;
+    throw new Error("This method is not implemented.");
   }
 
   async generateCharacterAsync(): Promise<string> {
