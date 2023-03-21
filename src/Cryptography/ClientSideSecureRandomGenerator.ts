@@ -1,7 +1,12 @@
 import { ISecureRandomGenerator } from "./ISecureRandomGenerator";
 
-const MinimumByteValue = 0;
+// const MinimumByteValue = 0;
 const MaximumByteValue = 255;
+// const MinimumIntegerValue = -2147483648;
+const MaximumIntegerValue = 2147483647;
+// const MinimumLongValue = -9223372036854775808;
+const MaximumLongValue = 9223372036854775807;
+const RandomValueMultiplier = 1000000000000000000;
 
 export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
 
@@ -9,7 +14,7 @@ export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
 
   private generateNumberAsync(): Promise<number> {
     return new Promise<number>(resolve => {
-      const randomNumber = Math.round(Math.random() * 100000000000000);
+      const randomNumber = Math.round(Math.random() * RandomValueMultiplier);
 
       resolve(randomNumber);
     });
@@ -22,7 +27,7 @@ export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
         if (maximum < 1) { throw new Error("Maximum must be greater than or equal to one (1)."); }
         if (minimum >= maximum) { throw new Error(`Maximum (${maximum}) must be greater than minimum (${minimum}).`); }
 
-        const randomNumber = Math.floor(number * (maximum - minimum)) + minimum;
+        const randomNumber = Math.floor(number % (maximum - minimum)) + minimum;
 
         resolve(randomNumber);
       } catch (error) { reject(error); }
@@ -32,8 +37,6 @@ export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
   private generateFixedLengthNumberAsync(number: number, digits: number): Promise<number> {
     return new Promise<number>(async (resolve, reject) => {
       try {
-        if (digits < 1 || digits > 10) { throw new Error("Digits must be greater than zero (0) and less than or equal to ten (10)."); }
-
         let minimum = 1;
         let maximum = 9;
 
@@ -51,26 +54,39 @@ export class ClientSideSecureRandomGenerator implements ISecureRandomGenerator {
 
   async generateByteAsync(): Promise<number> {
     let randomValue = await this.generateNumberAsync();
-    randomValue = await this.capNumberInRangeAsync(randomValue, MinimumByteValue, MaximumByteValue);
+    randomValue = randomValue % MaximumByteValue;
 
     return randomValue;
   }
 
   async generateIntegerAsync(digits?: number, minimum?: number, maximum?: number): Promise<number> {
-    let randomNumber = await this.generateNumberAsync();
+    let randomValue = await this.generateNumberAsync();
+    randomValue = randomValue % MaximumIntegerValue;
 
     if (typeof digits === "number" && !isNaN(digits)) {
-      randomNumber = await this.generateFixedLengthNumberAsync(randomNumber, digits);
-    } else if (typeof minimum === "number" && !isNaN(minimum)
-      && typeof maximum === "number" && !isNaN(maximum)) {
-      randomNumber = await this.capNumberInRangeAsync(randomNumber, minimum, maximum);
+      if (digits < 1 || digits > 10) { throw new Error("Digits must be greater than zero (0) and less than or equal to ten (10)."); }
+
+      randomValue = await this.generateFixedLengthNumberAsync(randomValue, digits);
+    } else if (typeof minimum === "number" && !isNaN(minimum) && typeof maximum === "number" && !isNaN(maximum)) {
+      randomValue = await this.capNumberInRangeAsync(randomValue, minimum, maximum);
     }
 
-    return randomNumber;
+    return randomValue;
   }
 
   async generateLongAsync(digits?: number, minimum?: number, maximum?: number): Promise<number> {
-    throw new Error("This method is not implemented.");
+    let randomValue = await this.generateNumberAsync();
+    randomValue = randomValue % MaximumLongValue;
+
+    if (typeof digits === "number" && !isNaN(digits)) {
+      if (digits < 1 || digits > 18) { throw new Error("Digits must be greater than zero (0) and less than or equal to ten (18)."); }
+
+      randomValue = await this.generateFixedLengthNumberAsync(randomValue, digits);
+    } else if (typeof minimum === "number" && !isNaN(minimum) && typeof maximum === "number" && !isNaN(maximum)) {
+      randomValue = await this.capNumberInRangeAsync(randomValue, minimum, maximum);
+    }
+
+    return randomValue;
   }
 
   async generateCharacterAsync(): Promise<string> {
