@@ -21,11 +21,11 @@ export class Fetcher implements IFetcher {
   private constructor() { }
 
   private retrieveFetchMechanism(): FetchMechanism {
+    if (Platform.isNodeJS()) { return FetchMechanism.HttpModule; }
+
     try {
       if (typeof fetch === "function") { return FetchMechanism.Fetch; }
     } catch { }
-
-    if (Platform.isNodeJS()) { return FetchMechanism.HttpModule; }
 
     const { xmlHttpRequestCreatorIndex, } = this.createXmlHttpRequest();
 
