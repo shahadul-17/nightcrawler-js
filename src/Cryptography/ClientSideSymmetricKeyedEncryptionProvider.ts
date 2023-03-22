@@ -1,31 +1,40 @@
 import CryptoJS from "crypto-js";
-import { Configuration } from "../Configuration";
-import { ClientSideKeyedHashProvider } from "./ClientSideKeyedHashProvider";
-import { KeyedHashAlgorithm, SymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
+import { ClientSideHashProvider } from "./ClientSideHashProvider";
+import { ClientSideSecureRandomGenerator } from "./ClientSideSecureRandomGenerator";
+import { HashAlgorithm, SymmetricKeyedEncryptionAlgorithm } from "./Enumerations";
 import { IDeriveBytes } from "./IDeriveBytes";
 import { ISymmetricKeyedEncryptionProvider } from "./ISymmetricKeyedEncryptionProvider";
 import { Rfc2898DeriveBytes } from "./Rfc2898DeriveBytes";
 
+const KeyLength = 128;
+const SaltLength = 64;
 const BlockSize = 128;
 const ByteDerivationIterations = 1024;
+const DefaultHashAlgorithm = HashAlgorithm.SHA512;
 
 export class ClientSideSymmetricKeyedEncryptionProvider implements ISymmetricKeyedEncryptionProvider {
 
-  private constructor() {
-    Configuration.set("symmetricKeyedEncryptionProviderKeyAndInitializationVectorDerivationSecretKey",
-      "3a2360922b3db011394c27e3c7871339ffaaba72f85e6f25a245b772a9d079c6b8f38267de7472c92f219aa5c9173fece5f51e0ef11bc22dcf4e2e7f0a173fce");
-    Configuration.set("symmetricKeyedEncryptionProviderSalt",
-      "f0a3021df20b94a868fccd058d26f7e0579db0e7552c5ded4b919139f3a6c1df852769382527ad37aaa6c4bbd4b64e38142d019a0c4816d74a881374b2acad58");
+  private constructor() { }
+
+  private async generateSaltAsync(): Promise<string> {
+    let arbitraryNumberAsString = (Date.now() % 8192).toString();
+
+    // arbitrary number could be of odd length...
+    if (arbitraryNumberAsString.length % 2 != 0) {
+      arbitraryNumberAsString += await ClientSideSecureRandomGenerator.instance.generateCharacterAsync();
+    }
+
+    const randomStringLength = (SaltLength - arbitraryNumberAsString.length) / 2;
+    const randomStringA = await ClientSideSecureRandomGenerator.instance.generateStringAsync(randomStringLength);
+    const randomStringB = await ClientSideSecureRandomGenerator.instance.generateStringAsync(randomStringLength);
+    const salt = `${randomStringA}${arbitraryNumberAsString}${randomStringB}`;
+
+    return salt;
   }
 
-  private async deriveKeyAndInitializationVectorAsync(key: string, cipherHelperConfiguration: any) {
-    const hashedKey = await ClientSideKeyedHashProvider.instance.computeHashAsync(key,
-      Configuration.get("symmetricKeyedEncryptionProviderKeyAndInitializationVectorDerivationSecretKey") as string,
-      KeyedHashAlgorithm.HMACSHA512);
-    const hashedSalt = await ClientSideKeyedHashProvider.instance.computeHashAsync(
-      Configuration.get("symmetricKeyedEncryptionProviderSalt"),
-      Configuration.get("symmetricKeyedEncryptionProviderKeyAndInitializationVectorDerivationSecretKey") as string,
-      KeyedHashAlgorithm.HMACSHA512);
+  private async deriveKeyAndInitializationVectorAsync(key: string, salt: string, cipherHelperConfiguration: any) {
+    const hashedKey = await ClientSideHashProvider.instance.computeHashAsync(key, DefaultHashAlgorithm);
+    const hashedSalt = await ClientSideHashProvider.instance.computeHashAsync(salt, DefaultHashAlgorithm);
     const deriveBytes: IDeriveBytes = new Rfc2898DeriveBytes(hashedKey, hashedSalt, ByteDerivationIterations);
     const derivedKey = await deriveBytes.getBytesAsync(cipherHelperConfiguration.keySize / 8);
     const derivedInitializationVector = await deriveBytes.getBytesAsync(BlockSize / 8);
@@ -81,8 +90,10 @@ export class ClientSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
     return configuration;
   }
 
-  async generateKeyAsync(algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
-    throw new Error("This method is not implemented.");
+  async generateKeyAsync(): Promise<string> {
+    const key = await ClientSideSecureRandomGenerator.instance.generateStringAsync(KeyLength);
+
+    return key;
   }
 
   async encryptAsync(plaintext: string, key: string, algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
@@ -90,13 +101,18 @@ export class ClientSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
 
     if (!cipherHelperConfiguration) { throw new Error("Unsupported encryption algorithm provided."); }
 
-    const { derivedKey, derivedInitializationVector, } = await this.deriveKeyAndInitializationVectorAsync(key, cipherHelperConfiguration);
+    const salt = await this.generateSaltAsync();
+    const { derivedKey, derivedInitializationVector, } = await this.deriveKeyAndInitializationVectorAsync(key, salt, cipherHelperConfiguration);
     const cipherParams = CryptoJS.AES.encrypt(plaintext, derivedKey, {
       iv: derivedInitializationVector,
       mode: cipherHelperConfiguration.mode,
       padding: CryptoJS.pad.Pkcs7,
     });
-    const ciphertext = cipherParams.ciphertext.toString(CryptoJS.enc.Base64url);
+    const saltAsWordArray = CryptoJS.enc.Utf8.parse(salt);
+    const ciphertext = CryptoJS.lib.WordArray.create()
+      .concat(saltAsWordArray)
+      .concat(cipherParams.ciphertext)
+      .toString(CryptoJS.enc.Base64url);
 
     return ciphertext;
   }
@@ -106,9 +122,18 @@ export class ClientSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
 
     if (!cipherHelperConfiguration) { throw new Error("Unsupported encryption algorithm provided."); }
 
-    const { derivedKey, derivedInitializationVector, } = await this.deriveKeyAndInitializationVectorAsync(key, cipherHelperConfiguration);
+    let ciphertextAsWordArray = CryptoJS.enc.Base64url.parse(ciphertext);
+    let ciphertextAsWords = ciphertextAsWordArray.words;
+    const saltAsWords = ciphertextAsWords.slice(0, SaltLength / 4);
+    const saltAsWordArray = CryptoJS.lib.WordArray.create(saltAsWords);
+    const salt = saltAsWordArray.toString(CryptoJS.enc.Utf8);
+
+    ciphertextAsWords = ciphertextAsWords.slice(saltAsWords.length);
+    ciphertextAsWordArray = CryptoJS.lib.WordArray.create(ciphertextAsWords);
+
+    const { derivedKey, derivedInitializationVector, } = await this.deriveKeyAndInitializationVectorAsync(key, salt, cipherHelperConfiguration);
     const plaintext = CryptoJS.AES.decrypt({
-      ciphertext: CryptoJS.enc.Base64url.parse(ciphertext),
+      ciphertext: ciphertextAsWordArray,
       iv: derivedInitializationVector,
       key: derivedKey,
       padding: CryptoJS.pad.Pkcs7,

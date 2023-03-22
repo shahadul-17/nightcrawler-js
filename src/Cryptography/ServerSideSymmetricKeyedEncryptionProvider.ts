@@ -7,7 +7,8 @@ export class ServerSideSymmetricKeyedEncryptionProvider implements ISymmetricKey
 
   private constructor() { }
 
-  async generateKeyAsync(algorithm: SymmetricKeyedEncryptionAlgorithm): Promise<string> {
+  async generateKeyAsync(): Promise<string> {
+    const algorithm = SymmetricKeyedEncryptionAlgorithm.AESCBC256;
     const response = await Fetcher.instance.fetchAsync({
       method: "GET",
       url: `${Configuration.getServerAddress()}/api/keys/${algorithm}`,
